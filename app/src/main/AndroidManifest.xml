@@ -3,16 +3,16 @@
     package="com.mahmoudtarrasse.baking">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.READ_SYNC_SETTINGS"/>
-    <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS"/>
-    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS"/>
+    <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
+    <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
+    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
 
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme.NoActionBar">
         <activity
             android:name=".ui.MainActivity"
             android:label="@string/app_name"
@@ -25,23 +25,24 @@
         </activity>
 
         <provider
-            android:authorities="com.mahmoudtarrasse.baking"
             android:name=".data.RecipeContentProvider"
+            android:authorities="com.mahmoudtarrasse.baking"
             android:enabled="true"
             android:exported="true"
-            android:syncable="true"/>
+            android:syncable="true" />
 
-
-        <service android:name=".sync.RecipeSyncService"
+        <service
+            android:name=".sync.RecipeSyncService"
             android:exported="true"
             android:process=":sync">
             <intent-filter>
-                <action android:name="android.content.SyncAdapter"/>
+                <action android:name="android.content.SyncAdapter" />
             </intent-filter>
-            <meta-data android:name="android.content.SyncAdapter"
+
+            <meta-data
+                android:name="android.content.SyncAdapter"
                 android:resource="@xml/syncadapter" />
         </service>
-
         <service android:name=".sync.RecipeAuthenticatorService">
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator" />
@@ -51,6 +52,36 @@
                 android:name="android.accounts.AccountAuthenticator"
                 android:resource="@xml/authenticator" />
         </service>
+
+        <activity
+            android:name=".ui.RecipeActivity"
+            android:label="@string/title_activity_recipe"
+            android:parentActivityName=".ui.MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.mahmoudtarrasse.baking.ui.MainActivity" />
+        </activity>
+        <activity
+            android:name=".ui.StepActivity"
+            android:label="@string/title_activity_step"
+            android:parentActivityName=".ui.RecipeActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.mahmoudtarrasse.baking.ui.RecipeActivity" />
+        </activity>
+
+        <receiver android:name=".widget.RecipeWidgetProvider" >
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.udacity.stockhawk.ACTION_DATA_UPDATED"/>
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider"
+                android:resource="@xml/recipe_appwidget_info" />
+        </receiver>
+
+        <service android:name=".widget.RecipeRemoteViewService"
+            android:permission="android.permission.BIND_REMOTEVIEWS"/>
     </application>
 
 </manifest>

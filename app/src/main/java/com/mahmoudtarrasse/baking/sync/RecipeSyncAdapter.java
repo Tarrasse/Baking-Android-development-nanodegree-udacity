@@ -9,23 +9,22 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.SyncRequest;
 import android.content.SyncResult;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 
 
 import com.mahmoudtarrasse.baking.R;
-import com.mahmoudtarrasse.baking.Utilty;
-import com.mahmoudtarrasse.baking.data.RecipeContentProvider;
+import com.mahmoudtarrasse.baking.Utility;
 import com.mahmoudtarrasse.baking.data.RecipesContract;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import timber.log.Timber;
 
 /**
  * Created by mahmoud on 3/25/2017.
@@ -58,35 +57,41 @@ public class RecipeSyncAdapter extends AbstractThreadedSyncAdapter {
                               ContentProviderClient contentProviderClient,
                               SyncResult syncResult) {
 
-        Timber.plant(new Timber.DebugTree());
-
         String url = "https://d17h27t6h515a5.cloudfront.net/topher/2017/May/5907926b_baking/baking.json";
         OkHttpClient client = new OkHttpClient();
-        ;
-
         Request request = new Request.Builder()
                 .url(url)
                 .build();
-
-        okhttp3.Response response = null;
+        okhttp3.Response response;
         try {
             response = client.newCall(request).execute();
             String body = response.body().string();
             response.close();
+            JSONArray array = new JSONArray(body);
+            ContentValues[] values =  new ContentValues[array.length()];
+            for (int i = 0; i<array.length(); i++){
+                JSONObject recipe = (JSONObject) array.get(i);
+                int id = recipe.getInt("id");
+                String name = recipe.getString("name");
+                String ingredientsJson = recipe.getJSONArray("ingredients").toString();
+                String stepsJson = recipe.getJSONArray("steps").toString();
+                int servings = recipe.getInt("servings");
+                String Img = recipe.getString("image");
 
-            ContentValues values = new ContentValues();
-            values.put(RecipeContentProvider.JSON_DATA, body);
-            getContext().getContentResolver().bulkInsert(RecipesContract.RecipeTable.CONTENT_URI, new ContentValues[]{values});
-            Timber.d(body);
+                ContentValues temp = RecipesContract.RecipeTable.createContentValues(id, name, servings, Img, ingredientsJson, stepsJson);
+                values[i] = temp;
+            }
+            getContext().getContentResolver().bulkInsert(RecipesContract.RecipeTable.CONTENT_URI, values);
         } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
             e.printStackTrace();
         }
     }
 
     public static void configurePeriodicSync(Context context, int syncInterval, int flexTime) {
-        Timber.d("configurePeriodicSync");
         Account account = getSyncAccount(context);
-        String authority = Utilty.CONTENT_AUTHORITY;
+        String authority = Utility.CONTENT_AUTHORITY;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             SyncRequest request = new SyncRequest.Builder().
                     syncPeriodic(syncInterval, flexTime).
@@ -97,7 +102,6 @@ public class RecipeSyncAdapter extends AbstractThreadedSyncAdapter {
             ContentResolver.addPeriodicSync(account,
                     authority, new Bundle(), syncInterval);
         }
-        Timber.d("configurePeriodicSync");
     }
 
     public static void syncImmediately(Context context) {
@@ -105,20 +109,16 @@ public class RecipeSyncAdapter extends AbstractThreadedSyncAdapter {
         bundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
         bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
         ContentResolver.requestSync(getSyncAccount(context),
-                Utilty.CONTENT_AUTHORITY, bundle);
-        Timber.d("syncImmediately");
-
+                Utility.CONTENT_AUTHORITY, bundle);
     }
 
-    //tested
     public static Account getSyncAccount(Context context) {
         AccountManager accountManager =
                 (AccountManager) context.getSystemService(Context.ACCOUNT_SERVICE);
 
         Account newAccount = new Account(
-                context.getString(R.string.app_name), Utilty.CONTENT_AUTHORITY);
+                context.getString(R.string.app_name), Utility.CONTENT_AUTHORITY);
 
-        Timber.d(newAccount.toString());
         if ( null == accountManager.getPassword(newAccount) ) {
             if (!accountManager.addAccountExplicitly(newAccount, "", null)) {
                 return null;
@@ -129,14 +129,12 @@ public class RecipeSyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     private static void onAccountCreated(Account newAccount, Context context) {
-        Timber.d("account created");
         RecipeSyncAdapter.configurePeriodicSync(context, SYNC_INTERVAL, SYNC_FLEXTIME);
-        ContentResolver.setSyncAutomatically(newAccount, Utilty.CONTENT_AUTHORITY, true);
+        ContentResolver.setSyncAutomatically(newAccount, Utility.CONTENT_AUTHORITY, true);
         syncImmediately(context);
     }
 
     public static void initializeSyncAdapter(Context context) {
-        Timber.d("in init");
         getSyncAccount(context);
     }
 

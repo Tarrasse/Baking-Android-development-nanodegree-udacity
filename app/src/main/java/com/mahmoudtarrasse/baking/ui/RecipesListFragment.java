@@ -1,6 +1,7 @@
 package com.mahmoudtarrasse.baking.ui;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.app.Fragment;
@@ -16,21 +17,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.google.gson.Gson;
 import com.mahmoudtarrasse.baking.R;
+import com.mahmoudtarrasse.baking.Utility;
 import com.mahmoudtarrasse.baking.data.RecipesContract;
-import com.mahmoudtarrasse.baking.models.Recipe;
-
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.mahmoudtarrasse.baking.modules.Recipe;
 
 import java.util.ArrayList;
 
 import timber.log.Timber;
 
-/**
- *
- */
+
 public class RecipesListFragment extends Fragment {
     private RecyclerView recipesRecyclerView;
     private RecipesAdapter adapter;
@@ -42,14 +38,16 @@ public class RecipesListFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(final LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView  = inflater.inflate(R.layout.fragment_recipes_list, container, false);
         recipesRecyclerView = (RecyclerView) rootView.findViewById(R.id.recipes_list);
-        adapter = new RecipesAdapter(getActivity(), recipes, new RecipesAdapter.ItemClickListener() {
+        adapter = new RecipesAdapter(getActivity(), null, new RecipesAdapter.ItemClickListener() {
             @Override
-            public void OnItemClick(View v, int position) {
-                Timber.d(String.format("item %d is clicked", position));
+            public void OnItemClick(View v, int position, int id) {
+                Intent intent = new Intent(getActivity(), RecipeActivity.class);
+                intent.putExtra(Utility.EXTRA_RECIPE_ID, id);
+                startActivity(intent);
             }
         });
 
@@ -77,26 +75,8 @@ public class RecipesListFragment extends Fragment {
 
         @Override
         public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-            recipes = new ArrayList<>();
-            if (null != data && !(data.getCount() < 1)){
-                data.moveToFirst();
-                while (! data.isAfterLast()){
-                    String temp = data.getString(RecipesContract.RecipeFile.MATRIX_CURSOR_JSON_COLUMNS_INDEX);
-                    Recipe recipe = new Recipe();
-                    try {
-                        JSONObject json = new JSONObject(temp);
-                        recipe.setName(json.getString("name"));
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    Gson gson = new Gson();
-                    Timber.d(temp);
-                    recipe = gson.fromJson(temp, Recipe.class);
-                    recipes.add(recipe);
-                    data.moveToNext();
-                }
-            }
-            adapter.swapCursor(recipes);
+            data.moveToFirst();
+            adapter.swapCursor(data);
             Timber.d(String.valueOf(data.getCount()));
         }
 

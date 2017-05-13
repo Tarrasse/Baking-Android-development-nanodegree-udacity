@@ -26,7 +26,10 @@ public class MainActivity extends AppCompatActivity {
 
         RecipeSyncAdapter.initializeSyncAdapter(this);
 
-        getFragmentManager().beginTransaction().replace(R.id.recipes_list_place_holder, new RecipesListFragment()).commit();
+        getFragmentManager()
+                .beginTransaction()
+                .replace(R.id.recipes_list_place_holder, new RecipesListFragment())
+                .commit();
 
     }
 
@@ -46,34 +49,10 @@ public class MainActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            RecipeSyncAdapter.syncImmediately(this);
             return true;
         }
 
         return super.onOptionsItemSelected(item);
     }
-
-//    public class task extends AsyncTask<Object, Object, String> {
-//
-//        @Override
-//        protected String doInBackground(Object... params) {
-//            String url = "https://d17h27t6h515a5.cloudfront.net/topher/2017/May/5907926b_baking/baking.json";
-//            OkHttpClient client = new OkHttpClient();
-//
-//            Request request = new Request.Builder()
-//                    .url(url)
-//                    .build();
-//
-//            okhttp3.Response response = null;
-//            try {
-//                response = client.newCall(request).execute();
-//                ContentValues values = new ContentValues();
-//                values.put(RecipeContentProvider.JSON_DATA, response.body().string());
-//                getContentResolver().bulkInsert(RecipesContract.RecipeTable.CONTENT_URI, new ContentValues[]{values});
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//
-//            return null;
-//        }
-//    }
 }

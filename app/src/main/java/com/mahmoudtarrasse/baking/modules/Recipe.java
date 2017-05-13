@@ -1,12 +1,13 @@
-package com.mahmoudtarrasse.baking.models;
+package com.mahmoudtarrasse.baking.modules;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
  * Created by mahmoud on 04/05/17.
  */
 
-public class Recipe{
+public class Recipe implements Serializable{
 
     /**
      * id : 1
