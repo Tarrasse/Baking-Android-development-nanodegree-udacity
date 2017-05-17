@@ -60,7 +60,7 @@ public class StepFragment extends Fragment {
     private OnNavigation navigator;
 
 
-//    private SimpleExoPlayerView playerView;
+    private SimpleExoPlayerView playerView;
     private TextView titleTextView;
     private TextView descTextView;
     private VideoView videoView;
@@ -81,6 +81,7 @@ public class StepFragment extends Fragment {
 
         View rootView = inflater.inflate(R.layout.fragment_step, container, false);
 
+        playerView = (SimpleExoPlayerView) rootView.findViewById(R.id.exo_player);
         titleTextView = (TextView) rootView.findViewById(R.id.step_name);
         descTextView = (TextView) rootView.findViewById(R.id.step_description);
         videoView = (VideoView) rootView.findViewById(R.id.video_view);
@@ -153,26 +154,44 @@ public class StepFragment extends Fragment {
     {
         try
         {
-            final MediaController mediaController = new MediaController(getActivity());
-            mediaController.setAnchorView(videoView);
 
-            Uri video = Uri.parse(url);
-            videoView.setMediaController(mediaController);
-            videoView.setVideoURI(video);
-            videoView.requestFocus();
-            videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener()
-            {
-                public void onPrepared(MediaPlayer mp)
-                {
-                    videoView.start();
-                    mp.setOnVideoSizeChangedListener(new MediaPlayer.OnVideoSizeChangedListener() {
-                        @Override
-                        public void onVideoSizeChanged(MediaPlayer mp, int width, int height) {
-                            mediaController.setAnchorView(videoView);
-                        }
-                    });
-                }
-            });
+            Handler mainHandler = new Handler();
+            BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
+            TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory(bandwidthMeter);
+            TrackSelector trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
+            DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(getActivity(),
+                    Util.getUserAgent(getActivity(), "yourApplicationName"));
+            ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
+
+            SimpleExoPlayer player = ExoPlayerFactory.newSimpleInstance(getActivity(), trackSelector);
+
+            playerView.setPlayer(player);
+
+            MediaSource videoSource = new ExtractorMediaSource(Uri.parse(url),
+                    dataSourceFactory, extractorsFactory, null, null);
+
+            player.prepare(videoSource);
+
+//            final MediaController mediaController = new MediaController(getActivity());
+//            mediaController.setAnchorView(videoView);
+//
+//            Uri video = Uri.parse(url);
+//            videoView.setMediaController(mediaController);
+//            videoView.setVideoURI(video);
+//            videoView.requestFocus();
+//            videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener()
+//            {
+//                public void onPrepared(MediaPlayer mp)
+//                {
+//                    videoView.start();
+//                    mp.setOnVideoSizeChangedListener(new MediaPlayer.OnVideoSizeChangedListener() {
+//                        @Override
+//                        public void onVideoSizeChanged(MediaPlayer mp, int width, int height) {
+//                            mediaController.setAnchorView(videoView);
+//                        }
+//                    });
+//                }
+//            });
 
         }
         catch(Exception e)
