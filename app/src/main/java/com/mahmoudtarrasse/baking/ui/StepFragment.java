@@ -63,10 +63,8 @@ public class StepFragment extends Fragment {
     private SimpleExoPlayerView playerView;
     private TextView titleTextView;
     private TextView descTextView;
-    private VideoView videoView;
-    private Button nextButton;
-    private Button prevButton;
-    private SimpleExoPlayer player;
+    private TextView noVideoView;
+
 
     public StepFragment() {
     }
@@ -84,8 +82,8 @@ public class StepFragment extends Fragment {
         playerView = (SimpleExoPlayerView) rootView.findViewById(R.id.exo_player);
         titleTextView = (TextView) rootView.findViewById(R.id.step_name);
         descTextView = (TextView) rootView.findViewById(R.id.step_description);
-        videoView = (VideoView) rootView.findViewById(R.id.video_view);
-        prevButton = (Button) rootView.findViewById(R.id.prev_button);
+        noVideoView = (TextView) rootView.findViewById(R.id.no_video_available);
+        Button prevButton = (Button) rootView.findViewById(R.id.prev_button);
         if (prevButton != null)
             prevButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -93,7 +91,7 @@ public class StepFragment extends Fragment {
                     previous();
                 }
             });
-        nextButton = (Button) rootView.findViewById(R.id.next_button);
+        Button nextButton = (Button) rootView.findViewById(R.id.next_button);
 
         if (nextButton != null)
             nextButton.setOnClickListener(new View.OnClickListener() {
@@ -135,6 +133,9 @@ public class StepFragment extends Fragment {
                 if(step.getVideoURL() != null && !(step.getVideoURL().isEmpty())){
                     Timber.d(step.getVideoURL());
                     playVideo(step.getVideoURL());
+                }else{
+                    noVideoView.setVisibility(View.VISIBLE);
+
                 }
 
             } catch (JSONException e) {
@@ -171,27 +172,6 @@ public class StepFragment extends Fragment {
                     dataSourceFactory, extractorsFactory, null, null);
 
             player.prepare(videoSource);
-
-//            final MediaController mediaController = new MediaController(getActivity());
-//            mediaController.setAnchorView(videoView);
-//
-//            Uri video = Uri.parse(url);
-//            videoView.setMediaController(mediaController);
-//            videoView.setVideoURI(video);
-//            videoView.requestFocus();
-//            videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener()
-//            {
-//                public void onPrepared(MediaPlayer mp)
-//                {
-//                    videoView.start();
-//                    mp.setOnVideoSizeChangedListener(new MediaPlayer.OnVideoSizeChangedListener() {
-//                        @Override
-//                        public void onVideoSizeChanged(MediaPlayer mp, int width, int height) {
-//                            mediaController.setAnchorView(videoView);
-//                        }
-//                    });
-//                }
-//            });
 
         }
         catch(Exception e)
