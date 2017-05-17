@@ -1,10 +1,20 @@
 package com.mahmoudtarrasse.baking;
 
+import android.support.test.espresso.Espresso;
+import android.support.test.espresso.ViewAction;
+import android.support.test.espresso.action.ViewActions;
+import android.support.test.espresso.assertion.ViewAssertions;
+import android.support.test.espresso.matcher.ViewMatchers;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 
+import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static android.support.test.espresso.matcher.ViewMatchers.withText;
+
 import com.mahmoudtarrasse.baking.ui.MainActivity;
 
+
+import org.hamcrest.Matchers;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,6 +33,9 @@ public class UiTest {
 
     @Test
     public void testList(){
-
+        Espresso.onView(
+                ViewMatchers.withId(R.id.recipes_list)
+        ).perform(ViewActions.click())
+        .check(ViewAssertions.doesNotExist());
     }
 }
