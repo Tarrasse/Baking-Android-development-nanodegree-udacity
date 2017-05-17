@@ -24,6 +24,7 @@ public class RecipeActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.recipes_activity_toolbar);
         toolbar.setTitle(getString(R.string.recipe_activity_title));
         setSupportActionBar(toolbar);
+        //noinspection ConstantConditions
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {

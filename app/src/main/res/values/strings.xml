@@ -10,5 +10,7 @@
     <string name="title_activity_step">StepActivity</string>
     <string name="previous_button_prev">previous</string>
     <string name="next_button">next</string>
+    <string name="novideo_available">noVideo available</string>
+    <string name="no_recipes_yet">No Recipes Yet</string>
 
 </resources>
