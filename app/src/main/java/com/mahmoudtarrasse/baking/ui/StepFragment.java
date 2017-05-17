@@ -14,6 +14,7 @@ import android.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.MediaController;
 import android.widget.TextView;
 import android.widget.VideoView;
@@ -54,12 +55,17 @@ public class StepFragment extends Fragment {
 
     private int stepId;
     private int recipeId;
+    private int numberOfSteps;
+
+    private OnNavigation navigator;
 
 
 //    private SimpleExoPlayerView playerView;
     private TextView titleTextView;
     private TextView descTextView;
     private VideoView videoView;
+    private Button nextButton;
+    private Button prevButton;
     private SimpleExoPlayer player;
 
     public StepFragment() {
@@ -78,6 +84,24 @@ public class StepFragment extends Fragment {
         titleTextView = (TextView) rootView.findViewById(R.id.step_name);
         descTextView = (TextView) rootView.findViewById(R.id.step_description);
         videoView = (VideoView) rootView.findViewById(R.id.video_view);
+        prevButton = (Button) rootView.findViewById(R.id.prev_button);
+        if (prevButton != null)
+            prevButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    previous();
+                }
+            });
+        nextButton = (Button) rootView.findViewById(R.id.next_button);
+
+        if (nextButton != null)
+            nextButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    next();
+                }
+            });
+
 
         Timber.d(recipeId + " " + stepId);
 
@@ -105,6 +129,7 @@ public class StepFragment extends Fragment {
                 Steps step = gson.fromJson(stepList.get(stepId).toString(), Steps.class);
                 titleTextView.setText(step.getShortDescription());
                 descTextView.setText(step.getDescription());
+                numberOfSteps = stepList.length();
 
                 if(step.getVideoURL() != null && !(step.getVideoURL().isEmpty())){
                     Timber.d(step.getVideoURL());
@@ -156,4 +181,37 @@ public class StepFragment extends Fragment {
         }
 
     }
+
+
+    public void next(){
+        if (navigator != null){
+            if (stepId >= (numberOfSteps-1))
+                navigator.OnSwitch(0);
+            else
+                navigator.OnSwitch((stepId + 1));
+        }
+    }
+
+    public void previous(){
+        if (navigator != null){
+            if (stepId == 0)
+                navigator.OnSwitch((numberOfSteps - 1));
+            else
+                navigator.OnSwitch((stepId - 1));
+        }
+    }
+
+
+    public OnNavigation getNavigator() {
+        return navigator;
+    }
+
+    public void setNavigator(OnNavigation navigator) {
+        this.navigator = navigator;
+    }
+
+    public interface OnNavigation{
+        public void OnSwitch (int position);
+    }
+
 }

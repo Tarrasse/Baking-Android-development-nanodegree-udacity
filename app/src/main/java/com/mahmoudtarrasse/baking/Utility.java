@@ -9,4 +9,9 @@ public class Utility {
     public static final String ARG_RECIPE_ID = "id";
     public static final String EXTRA_STEP_ID = "step_id";
     public static final String ARG_STEP_ID = "step_id";
+
+
+    public static int numberOfSteps(){
+        return 0;
+    }
 }

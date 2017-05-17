@@ -35,7 +35,6 @@ public class RecipeActivity extends AppCompatActivity {
         final int recipeId = getIntent().getIntExtra(Utility.EXTRA_RECIPE_ID, -1);
 
 
-
         if (findViewById(R.id.steps_fragment_palace_holder) != null){
             twoBane = true;
 

@@ -19,11 +19,21 @@ public class StepActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         int step = intent.getIntExtra(Utility.EXTRA_STEP_ID, -1);
-        int recipe = intent.getIntExtra(Utility.EXTRA_RECIPE_ID, -1);
-
+        final int recipe = intent.getIntExtra(Utility.EXTRA_RECIPE_ID, -1);
+        switchFragment(recipe, step);
+    }
+    
+    private void switchFragment(final int recipe, int step){
+        StepFragment fragment = createStepFragment(recipe, step);
+        fragment.setNavigator(new StepFragment.OnNavigation() {
+            @Override
+            public void OnSwitch(int position) {
+                switchFragment(recipe, position);
+            }
+        });
         getFragmentManager()
                 .beginTransaction()
-                .replace(R.id.steps_fragment_palace_holder, createStepFragment(recipe, step))
+                .replace(R.id.steps_fragment_palace_holder, fragment)
                 .commit();
     }
 
@@ -35,5 +45,7 @@ public class StepActivity extends AppCompatActivity {
         fragment.setArguments(args);
         return fragment;
     }
+
+
 
 }
