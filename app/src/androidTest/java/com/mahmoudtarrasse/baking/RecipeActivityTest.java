@@ -1,32 +1,29 @@
 package com.mahmoudtarrasse.baking;
 
+import android.content.Context;
 import android.content.Intent;
+import android.support.test.InstrumentationRegistry;
 import android.support.test.espresso.Espresso;
 import android.support.test.espresso.action.ViewActions;
 import android.support.test.espresso.assertion.ViewAssertions;
+import android.support.test.espresso.intent.Intents;
 import android.support.test.espresso.matcher.ViewMatchers;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
+import android.widget.TextView;
 
 
 import com.mahmoudtarrasse.baking.ui.MainActivity;
 import com.mahmoudtarrasse.baking.ui.RecipeActivity;
+import com.mahmoudtarrasse.baking.ui.StepActivity;
 
 
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import static android.support.test.espresso.intent.Intents.intended;
-import static android.support.test.espresso.intent.matcher.BundleMatchers.hasEntry;
-import static android.support.test.espresso.intent.matcher.IntentMatchers.hasAction;
-import static android.support.test.espresso.intent.matcher.IntentMatchers.hasCategories;
-import static android.support.test.espresso.intent.matcher.IntentMatchers.hasData;
-import static android.support.test.espresso.intent.matcher.IntentMatchers.hasExtras;
+import static android.support.test.espresso.intent.matcher.IntentMatchers.hasComponent;
 import static android.support.test.espresso.intent.matcher.IntentMatchers.toPackage;
-import static android.support.test.espresso.intent.matcher.UriMatchers.hasHost;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.core.AllOf.allOf;
 
 
 
@@ -37,13 +34,35 @@ import static org.hamcrest.core.AllOf.allOf;
 public class RecipeActivityTest {
 
     @Rule
-    public ActivityTestRule<RecipeActivity> mActivityRule = new ActivityTestRule<>(
-            RecipeActivity.class);
+    public ActivityTestRule<RecipeActivity> mActivityRule =
+            new ActivityTestRule<RecipeActivity>(RecipeActivity.class) {
+                @Override
+                protected Intent getActivityIntent() {
+                    Context targetContext = InstrumentationRegistry.getInstrumentation()
+                            .getTargetContext();
+                    Intent result = new Intent(targetContext, MainActivity.class);
+                    result.putExtra(Utility.EXTRA_RECIPE_ID, 1);
+                    return result;
+                }
+            };
 
 
     @Test
     public void checkIfIngredientsExists(){
-
+        Espresso.onView(ViewMatchers.withId(R.id.ingredients_list_linear_layout))
+                .check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
     }
+    @Test
+    public void goToStepActivity(){
+        Intents.init();
+
+        Espresso.onView(
+                ViewMatchers.withId(R.id.steps_recycler_view)
+        ).perform(ViewActions.click());
+        intended(toPackage(Utility.CONTENT_AUTHORITY));
+        intended(hasComponent(StepActivity.class.getName()));
+        Intents.release();
+    }
+
 
 }
