@@ -4,13 +4,19 @@ import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
 
+import com.google.gson.Gson;
 import com.mahmoudtarrasse.baking.R;
 import com.mahmoudtarrasse.baking.Utility;
 import com.mahmoudtarrasse.baking.data.RecipesContract;
+import com.mahmoudtarrasse.baking.modules.Ingredient;
+
+import org.json.JSONArray;
+import org.json.JSONException;
 
 import timber.log.Timber;
 
@@ -21,42 +27,49 @@ public class RecipeRemoteViewService extends RemoteViewsService {
     @Override
     public RemoteViewsFactory onGetViewFactory(Intent intent) {
 
-        Timber.d("public class RecipeRemoteViewService extends RemoteViewsService {\n");
-        return new StockRemoteViewsFactory(this.getApplicationContext(), intent);
+        return new RecipeRemoteViewsFactory(this.getApplicationContext(), intent);
 
     }
 
-    class StockRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory{
-        private final int mAppWidgetId;
+    class RecipeRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory {
         private Context mContext;
         private Cursor mCursor;
 
-        public StockRemoteViewsFactory(Context mContext, Intent intent) {
+        private JSONArray ingredients;
+        private int recipeId ;
+        private String recipeName;
+
+        public RecipeRemoteViewsFactory(Context mContext, Intent intent) {
             this.mContext = mContext;
-            mAppWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,
-                    AppWidgetManager.INVALID_APPWIDGET_ID);
+
         }
 
         @Override
         public void onCreate() {
-            mCursor = mContext.getContentResolver().query(RecipesContract.RecipeTable.CONTENT_URI,
+            recipeId = PreferenceManager.getDefaultSharedPreferences(mContext)
+                    .getInt(Utility.WIDGET_RECIPE_ID_PREF, 1);
+            mCursor = mContext.getContentResolver().query(RecipesContract.RecipeTable.buildRecipeId(recipeId),
                     null, null,
                     null, null);
-            if (mCursor != null){
+            if (mCursor != null) {
                 mCursor.moveToFirst();
-                Timber.d("length = " + mCursor.getCount());
+                String ingredientsJson = mCursor.getString(
+                        mCursor.getColumnIndex(RecipesContract.RecipeTable.INGREDIENTS_JSON)
+                );
+                String name = mCursor.getString(mCursor.getColumnIndex(RecipesContract.RecipeTable.NAME_COLUMN));
+                recipeName = name;
+                try {
+                    ingredients = new JSONArray(ingredientsJson);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
+
         }
 
         @Override
         public void onDataSetChanged() {
-            mCursor = mContext.getContentResolver().query(RecipesContract.RecipeTable.CONTENT_URI,
-                    null, null,
-                    null, null);
-            if (mCursor != null){
-                mCursor.moveToFirst();
-                Timber.d("length = " + mCursor.getCount());
-            }
+            onCreate();
         }
 
         @Override
@@ -66,31 +79,32 @@ public class RecipeRemoteViewService extends RemoteViewsService {
 
         @Override
         public int getCount() {
-            if (mCursor == null){
-                Timber.d("null cursor");
+            if (null == ingredients) {
                 return 0;
-            }else {
-                return mCursor.getCount();
+            } else {
+                return ingredients.length();
             }
         }
 
         @Override
         public RemoteViews getViewAt(int i) {
-            Timber.d("size = " + getCount());
-            mCursor.moveToPosition(i);
-            String name = mCursor.getString(mCursor.getColumnIndex(RecipesContract.RecipeTable.NAME_COLUMN));
-            int id =mCursor.getInt(mCursor.getColumnIndex(RecipesContract.RecipeTable.ID_COLUMN));
 
-            RemoteViews rv = new RemoteViews(mContext.getPackageName(), R.layout.widget_list_item);
-            rv.setTextViewText(R.id.symbol, name);
+            try {
+                String ingredientJson = ingredients.get(i).toString();
+                Gson gson = new Gson();
+                Ingredient ingredient = gson.fromJson(ingredientJson, Ingredient.class);
 
+                RemoteViews nameRemoteView = new RemoteViews(mContext.getPackageName(), R.layout.widget_list_item);
+                nameRemoteView.setTextViewText(R.id.symbol, ingredient.getIngredient());
 
-            Intent fillInIntent = new Intent();
-            Log.i("widget", id + " ");
-            Timber.d(id + " ");
-            fillInIntent.putExtra(Utility.EXTRA_RECIPE_ID, id);
-            rv.setOnClickFillInIntent(R.id.widget_list_item,fillInIntent);
-            return rv;
+                Intent fillInIntent = new Intent();
+                fillInIntent.putExtra(Utility.EXTRA_RECIPE_ID, recipeId);
+                nameRemoteView.setOnClickFillInIntent(R.id.widget_list_item, fillInIntent);
+                return nameRemoteView;
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            return null;
         }
 
         @Override

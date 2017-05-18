@@ -91,7 +91,7 @@ public class StepsFragment extends Fragment {
                 adapter.switchData(new JSONArray(stepsJson));
                 JSONArray ingredientsList = new JSONArray(ingredientsJson);
                 for (int i = 0 ; i< ingredientsList.length(); i++){
-                    Ingredients ingredient = gson.fromJson(ingredientsList.get(i).toString(), Ingredients.class);
+                    Ingredient ingredient = gson.fromJson(ingredientsList.get(i).toString(), Ingredient.class);
                     TextView temp = new TextView(getActivity());
                     temp.setText(ingredient.getIngredient());
                     ingredientsListLayout.addView(temp);

@@ -3,6 +3,7 @@ package com.mahmoudtarrasse.baking.ui;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -72,6 +73,11 @@ public class RecipeActivity extends AppCompatActivity {
                     .replace(R.id.ingredients_Fragment_placeHolder, createFragmentSteps(recipeId))
                     .commit();
         }
+
+        PreferenceManager.getDefaultSharedPreferences(this)
+                .edit()
+                .putInt(Utility.WIDGET_RECIPE_ID_PREF, recipeId)
+                .apply();
     }
 
     private StepsFragment createFragmentSteps(int id, StepsFragment.OnclickListener listener){

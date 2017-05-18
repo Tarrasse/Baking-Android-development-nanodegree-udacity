@@ -12,5 +12,6 @@
     <string name="next_button">next</string>
     <string name="novideo_available">noVideo available</string>
     <string name="no_recipes_yet">No Recipes Yet</string>
+    <string name="ingredients">Ingredients</string>
 
 </resources>

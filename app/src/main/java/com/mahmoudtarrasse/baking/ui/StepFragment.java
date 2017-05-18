@@ -2,8 +2,6 @@ package com.mahmoudtarrasse.baking.ui;
 
 
 import android.database.Cursor;
-import android.graphics.PixelFormat;
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -15,9 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.MediaController;
 import android.widget.TextView;
-import android.widget.VideoView;
 
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.SimpleExoPlayer;
@@ -39,7 +35,6 @@ import com.google.gson.Gson;
 import com.mahmoudtarrasse.baking.R;
 import com.mahmoudtarrasse.baking.Utility;
 import com.mahmoudtarrasse.baking.data.RecipesContract;
-import com.mahmoudtarrasse.baking.modules.Ingredients;
 import com.mahmoudtarrasse.baking.modules.Steps;
 
 import org.json.JSONArray;

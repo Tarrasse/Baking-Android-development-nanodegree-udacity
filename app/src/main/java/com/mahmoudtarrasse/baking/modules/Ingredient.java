@@ -4,7 +4,7 @@ package com.mahmoudtarrasse.baking.modules;
  * Created by mahmoud on 09/05/17.
  */
 
-public class Ingredients {
+public class Ingredient {
 
     /**
      * quantity : 2
