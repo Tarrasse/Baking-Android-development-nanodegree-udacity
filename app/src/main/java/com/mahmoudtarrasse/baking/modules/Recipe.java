@@ -1,5 +1,7 @@
 package com.mahmoudtarrasse.baking.modules;
 
+import android.app.Activity;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -7,7 +9,7 @@ import java.util.List;
  * Created by mahmoud on 04/05/17.
  */
 
-public class Recipe implements Serializable{
+public class Recipe extends Activity implements Serializable{
 
     /**
      * id : 1
