@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.app.LoaderManager;
 import android.content.CursorLoader;
 import android.content.Loader;
+import android.os.Parcelable;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -28,10 +29,13 @@ import timber.log.Timber;
 
 
 public class RecipesListFragment extends Fragment {
+    private static final String LIST_STATE_KEY = "list_state";
     private RecyclerView recipesRecyclerView;
     private RecipesAdapter adapter;
+    private RecyclerView.LayoutManager mLayoutManager;
 
     private ArrayList<Recipe> recipes ;
+    private Parcelable mListState;
 
 
     public RecipesListFragment() {
@@ -53,10 +57,11 @@ public class RecipesListFragment extends Fragment {
 
         recipesRecyclerView.setAdapter(adapter);
         if (getActivity().getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE){
-            recipesRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), calculateNoOfColumns(getActivity())));
+            mLayoutManager = new GridLayoutManager(getActivity(), calculateNoOfColumns(getActivity()));
         }else{
-            recipesRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+            mLayoutManager = new LinearLayoutManager(getActivity());
         }
+        recipesRecyclerView.setLayoutManager(mLayoutManager);
 
         getLoaderManager().initLoader(1, null, loaderCallbacks);
         return rootView;
@@ -93,5 +98,24 @@ public class RecipesListFragment extends Fragment {
         return noOfColumns;
     }
 
+    public void onSaveInstanceState(Bundle state) {
+        super.onSaveInstanceState(state);
+        mListState = mLayoutManager.onSaveInstanceState();
+        state.putParcelable(LIST_STATE_KEY, mListState);
+    }
 
+    @Override
+    public void onViewStateRestored(Bundle savedInstanceState) {
+        if(savedInstanceState != null)
+            mListState = savedInstanceState.getParcelable(LIST_STATE_KEY);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        if (mListState != null) {
+            mLayoutManager.onRestoreInstanceState(mListState);
+        }
+    }
 }

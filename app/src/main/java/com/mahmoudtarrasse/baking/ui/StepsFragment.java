@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.app.LoaderManager;
 import android.content.CursorLoader;
 import android.content.Loader;
+import android.os.Parcelable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -29,6 +30,11 @@ import timber.log.Timber;
 
 public class StepsFragment extends Fragment {
 
+    private static final String LIST_STATE_KEY = "list_state";
+    private Parcelable mListState;
+    private RecyclerView.LayoutManager mLayoutManager;
+
+
     private RecyclerView stepsRecyclerView;
     private LinearLayout ingredientsListLayout;
     private StepsAdapter adapter;
@@ -50,7 +56,8 @@ public class StepsFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_steps, container, false);
 
         stepsRecyclerView = (RecyclerView)rootView.findViewById(R.id.steps_recycler_view);
-        stepsRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        mLayoutManager = new LinearLayoutManager(getActivity());
+        stepsRecyclerView.setLayoutManager(mLayoutManager);
         adapter = new StepsAdapter(getActivity(), null);
         adapter.setOnClickListner(new StepsAdapter.ItemClickListener() {
             @Override
@@ -115,6 +122,27 @@ public class StepsFragment extends Fragment {
 
     public static interface OnclickListener {
         public void  onclick(int position);
+    }
+
+    public void onSaveInstanceState(Bundle state) {
+        super.onSaveInstanceState(state);
+        mListState = mLayoutManager.onSaveInstanceState();
+        state.putParcelable(LIST_STATE_KEY, mListState);
+    }
+
+    @Override
+    public void onViewStateRestored(Bundle savedInstanceState) {
+        if(savedInstanceState != null)
+            mListState = savedInstanceState.getParcelable(LIST_STATE_KEY);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        if (mListState != null) {
+            mLayoutManager.onRestoreInstanceState(mListState);
+        }
     }
 
 
