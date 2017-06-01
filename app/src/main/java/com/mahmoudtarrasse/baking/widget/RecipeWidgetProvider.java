@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.RemoteViews;
 
 import com.mahmoudtarrasse.baking.R;
@@ -23,7 +24,7 @@ public class RecipeWidgetProvider extends AppWidgetProvider {
 
         int[] appids = AppWidgetManager.getInstance(context).getAppWidgetIds(new ComponentName(context, RecipeWidgetProvider.class));
         AppWidgetManager.getInstance(context).notifyAppWidgetViewDataChanged(appids, R.id.recipes_widget_list_view);
-
+        onUpdate(context, AppWidgetManager.getInstance(context), appids);
     }
 
     @Override

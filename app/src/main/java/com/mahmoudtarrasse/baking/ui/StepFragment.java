@@ -15,15 +15,22 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.google.android.exoplayer2.C;
+import com.google.android.exoplayer2.ExoPlaybackException;
+import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.ExoPlayerFactory;
+import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
 import com.google.android.exoplayer2.extractor.ExtractorsFactory;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelection;
+import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.trackselection.TrackSelector;
 import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
 import com.google.android.exoplayer2.upstream.BandwidthMeter;
@@ -59,6 +66,10 @@ public class StepFragment extends Fragment {
     private TextView titleTextView;
     private TextView descTextView;
     private TextView noVideoView;
+
+    private SimpleExoPlayer mPlayer;
+
+    private long resumePosition = C.POSITION_UNSET;
 
 
     public StepFragment() {
@@ -151,23 +162,21 @@ public class StepFragment extends Fragment {
         try
         {
 
-            Handler mainHandler = new Handler();
             BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
             TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory(bandwidthMeter);
             TrackSelector trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
             DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(getActivity(),
-                    Util.getUserAgent(getActivity(), "yourApplicationName"));
+                    Util.getUserAgent(getActivity(), getActivity().getString(R.string.app_name)));
             ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
 
-            SimpleExoPlayer player = ExoPlayerFactory.newSimpleInstance(getActivity(), trackSelector);
+            mPlayer = ExoPlayerFactory.newSimpleInstance(getActivity(), trackSelector);
 
-            playerView.setPlayer(player);
+            playerView.setPlayer(mPlayer);
 
             MediaSource videoSource = new ExtractorMediaSource(Uri.parse(url),
                     dataSourceFactory, extractorsFactory, null, null);
 
-            player.prepare(videoSource);
-
+            mPlayer.prepare(videoSource);
         }
         catch(Exception e)
         {
@@ -208,4 +217,12 @@ public class StepFragment extends Fragment {
         public void OnSwitch (int position);
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mPlayer != null){
+            resumePosition = mPlayer.isCurrentWindowSeekable() ? Math.max(0, mPlayer.getCurrentPosition()) : C.TIME_UNSET;
+            mPlayer.release();
+        }
+    }
 }

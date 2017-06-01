@@ -1,5 +1,8 @@
 package com.mahmoudtarrasse.baking.ui;
 
+import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -11,6 +14,7 @@ import android.support.v7.widget.Toolbar;
 
 import com.mahmoudtarrasse.baking.R;
 import com.mahmoudtarrasse.baking.Utility;
+import com.mahmoudtarrasse.baking.widget.RecipeWidgetProvider;
 
 import timber.log.Timber;
 
@@ -78,6 +82,7 @@ public class RecipeActivity extends AppCompatActivity {
                 .edit()
                 .putInt(Utility.WIDGET_RECIPE_ID_PREF, recipeId)
                 .apply();
+        updateWidgets(getApplicationContext());
     }
 
     private StepsFragment createFragmentSteps(int id, StepsFragment.OnclickListener listener){
@@ -107,6 +112,21 @@ public class RecipeActivity extends AppCompatActivity {
         StepFragment fragment = new StepFragment();
         fragment.setArguments(args);
         return fragment;
+    }
+
+    public static void updateWidgets(Context context) {
+        Intent intent = new Intent(context.getApplicationContext(), RecipeWidgetProvider.class);
+        intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+        // Use an array and EXTRA_APPWIDGET_IDS instead of AppWidgetManager.EXTRA_APPWIDGET_ID,
+        // since it seems the onUpdate() is only fired on that:
+        AppWidgetManager widgetManager = AppWidgetManager.getInstance(context);
+        int[] ids = widgetManager.getAppWidgetIds(new ComponentName(context, RecipeWidgetProvider.class));
+
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
+            widgetManager.notifyAppWidgetViewDataChanged(ids, android.R.id.list);
+
+        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids);
+        context.sendBroadcast(intent);
     }
 
 }

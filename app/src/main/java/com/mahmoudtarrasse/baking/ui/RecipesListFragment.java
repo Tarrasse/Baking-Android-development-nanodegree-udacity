@@ -35,10 +35,19 @@ public class RecipesListFragment extends Fragment {
     private RecyclerView.LayoutManager mLayoutManager;
 
     private ArrayList<Recipe> recipes ;
-    private Parcelable mListState;
+    private Parcelable mListState = null;
+
 
 
     public RecipesListFragment() {
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        if (savedInstanceState != null){
+            mListState = savedInstanceState.getParcelable(LIST_STATE_KEY);
+        }
     }
 
     @Override
@@ -100,22 +109,25 @@ public class RecipesListFragment extends Fragment {
 
     public void onSaveInstanceState(Bundle state) {
         super.onSaveInstanceState(state);
-        mListState = mLayoutManager.onSaveInstanceState();
+//        mListState = mLayoutManager.onSaveInstanceState();
+        mListState = recipesRecyclerView.getLayoutManager().onSaveInstanceState();
         state.putParcelable(LIST_STATE_KEY, mListState);
     }
 
     @Override
     public void onViewStateRestored(Bundle savedInstanceState) {
-        if(savedInstanceState != null)
+        super.onViewStateRestored(savedInstanceState);
+        if (savedInstanceState != null)
             mListState = savedInstanceState.getParcelable(LIST_STATE_KEY);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-
         if (mListState != null) {
             mLayoutManager.onRestoreInstanceState(mListState);
+            recipesRecyclerView.getLayoutManager().onRestoreInstanceState(mListState);
+            Timber.d("ok");
         }
     }
 }

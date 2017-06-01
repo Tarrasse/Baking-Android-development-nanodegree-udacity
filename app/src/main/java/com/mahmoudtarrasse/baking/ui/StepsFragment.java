@@ -1,8 +1,12 @@
 package com.mahmoudtarrasse.baking.ui;
 
 import android.app.Fragment;
+import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.os.Build;
 import android.os.Bundle;
 import android.app.LoaderManager;
 import android.content.CursorLoader;
@@ -26,6 +30,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 import com.mahmoudtarrasse.baking.modules.*;
+import com.mahmoudtarrasse.baking.widget.RecipeWidgetProvider;
+
 import timber.log.Timber;
 
 public class StepsFragment extends Fragment {
@@ -43,7 +49,15 @@ public class StepsFragment extends Fragment {
 
 
 
+
     public StepsFragment() {
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        if (savedInstanceState != null)
+            mListState = savedInstanceState.getParcelable(LIST_STATE_KEY);
     }
 
     @Override
@@ -132,18 +146,21 @@ public class StepsFragment extends Fragment {
 
     @Override
     public void onViewStateRestored(Bundle savedInstanceState) {
-        if(savedInstanceState != null)
+        super.onViewStateRestored(savedInstanceState);
+        if(savedInstanceState != null){
             mListState = savedInstanceState.getParcelable(LIST_STATE_KEY);
+        }
     }
 
     @Override
     public void onResume() {
         super.onResume();
-
         if (mListState != null) {
             mLayoutManager.onRestoreInstanceState(mListState);
         }
     }
+
+
 
 
 }
