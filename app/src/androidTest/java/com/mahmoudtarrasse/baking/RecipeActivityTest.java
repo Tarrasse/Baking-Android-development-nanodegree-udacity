@@ -6,6 +6,7 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.espresso.Espresso;
 import android.support.test.espresso.action.ViewActions;
 import android.support.test.espresso.assertion.ViewAssertions;
+import android.support.test.espresso.contrib.RecyclerViewActions;
 import android.support.test.espresso.intent.Intents;
 import android.support.test.espresso.matcher.ViewMatchers;
 import android.support.test.rule.ActivityTestRule;
@@ -21,6 +22,8 @@ import com.mahmoudtarrasse.baking.ui.StepActivity;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.intent.Intents.intended;
 import static android.support.test.espresso.intent.matcher.IntentMatchers.hasComponent;
 import static android.support.test.espresso.intent.matcher.IntentMatchers.toPackage;
@@ -58,7 +61,7 @@ public class RecipeActivityTest {
 
         Espresso.onView(
                 ViewMatchers.withId(R.id.steps_recycler_view)
-        ).perform(ViewActions.click());
+        ).perform(RecyclerViewActions.actionOnItemAtPosition(1, click()));
         intended(toPackage(Utility.CONTENT_AUTHORITY));
         intended(hasComponent(StepActivity.class.getName()));
         Intents.release();

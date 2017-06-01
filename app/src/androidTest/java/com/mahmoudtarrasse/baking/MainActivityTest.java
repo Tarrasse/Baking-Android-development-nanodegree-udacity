@@ -2,6 +2,7 @@ package com.mahmoudtarrasse.baking;
 
 import android.content.Intent;
 import android.support.test.espresso.Espresso;
+import android.support.test.espresso.contrib.RecyclerViewActions;
 import android.support.test.espresso.intent.Intents;
 import android.support.test.espresso.ViewInteraction;
 import android.support.test.espresso.action.ViewActions;
@@ -19,6 +20,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.intent.Intents.intended;
 import static android.support.test.espresso.intent.matcher.BundleMatchers.hasEntry;
 import static android.support.test.espresso.intent.matcher.IntentMatchers.hasAction;
@@ -50,7 +52,7 @@ public class MainActivityTest {
 
         Espresso.onView(
                 ViewMatchers.withId(R.id.recipes_list)
-        ).perform(ViewActions.click());
+        ).perform(RecyclerViewActions.actionOnItemAtPosition(3, click()));
         intended(toPackage(Utility.CONTENT_AUTHORITY));
         intended(hasComponent(RecipeActivity.class.getName()));
         Intents.release();
