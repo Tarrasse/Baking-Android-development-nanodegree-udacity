@@ -29,13 +29,15 @@ import timber.log.Timber;
 
 
 public class RecipesListFragment extends Fragment {
-    private static final String LIST_STATE_KEY = "list_state";
+    private static final String LIST_STATE_KEY = "list_state_1";
     private RecyclerView recipesRecyclerView;
     private RecipesAdapter adapter;
     private RecyclerView.LayoutManager mLayoutManager;
 
     private ArrayList<Recipe> recipes ;
     private Parcelable mListState = null;
+
+    private int listPosition = -1;
 
 
 
@@ -46,7 +48,8 @@ public class RecipesListFragment extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         if (savedInstanceState != null){
-            mListState = savedInstanceState.getParcelable(LIST_STATE_KEY);
+            listPosition = savedInstanceState.getInt(LIST_STATE_KEY);
+            Timber.d("pos = " + String.valueOf(listPosition));
         }
     }
 
@@ -91,6 +94,8 @@ public class RecipesListFragment extends Fragment {
         public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
             data.moveToFirst();
             adapter.swapCursor(data);
+            if (listPosition != -1)
+                recipesRecyclerView.scrollToPosition(listPosition);
             Timber.d(String.valueOf(data.getCount()));
         }
 
@@ -109,17 +114,10 @@ public class RecipesListFragment extends Fragment {
 
     public void onSaveInstanceState(Bundle state) {
         super.onSaveInstanceState(state);
-//        mListState = mLayoutManager.onSaveInstanceState();
-        mListState = recipesRecyclerView.getLayoutManager().onSaveInstanceState();
-        state.putParcelable(LIST_STATE_KEY, mListState);
+        int pos = ((LinearLayoutManager)recipesRecyclerView.getLayoutManager()).findFirstCompletelyVisibleItemPosition();
+        state.putInt(LIST_STATE_KEY, pos);
     }
 
-    @Override
-    public void onViewStateRestored(Bundle savedInstanceState) {
-        super.onViewStateRestored(savedInstanceState);
-        if (savedInstanceState != null)
-            mListState = savedInstanceState.getParcelable(LIST_STATE_KEY);
-    }
 
     @Override
     public void onResume() {

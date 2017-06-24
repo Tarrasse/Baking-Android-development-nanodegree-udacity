@@ -1,17 +1,17 @@
 package com.mahmoudtarrasse.baking.ui;
 
 import android.app.Fragment;
-import android.appwidget.AppWidgetManager;
-import android.content.ComponentName;
-import android.content.Context;
+
 import android.content.Intent;
 import android.database.Cursor;
-import android.os.Build;
 import android.os.Bundle;
 import android.app.LoaderManager;
 import android.content.CursorLoader;
 import android.content.Loader;
 import android.os.Parcelable;
+
+import android.preference.PreferenceManager;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -30,13 +30,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 import com.mahmoudtarrasse.baking.modules.*;
-import com.mahmoudtarrasse.baking.widget.RecipeWidgetProvider;
 
 import timber.log.Timber;
 
 public class StepsFragment extends Fragment {
 
-    private static final String LIST_STATE_KEY = "list_state";
+    private static final String Steps_STATE_KEY = "list_state_2";
     private Parcelable mListState;
     private RecyclerView.LayoutManager mLayoutManager;
 
@@ -46,6 +45,7 @@ public class StepsFragment extends Fragment {
     private StepsAdapter adapter;
 
     private OnclickListener listener;
+    private int listPosition = -1;
 
 
 
@@ -54,10 +54,18 @@ public class StepsFragment extends Fragment {
     }
 
     @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if(savedInstanceState != null){
+            listPosition = savedInstanceState.getInt(Steps_STATE_KEY);
+        }
+        Timber.d("restored pos = " + String.valueOf(listPosition));
+    }
+
+    @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        if (savedInstanceState != null)
-            mListState = savedInstanceState.getParcelable(LIST_STATE_KEY);
+
     }
 
     @Override
@@ -120,8 +128,12 @@ public class StepsFragment extends Fragment {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-
+            if(listPosition != -1){
+                stepsRecyclerView.scrollToPosition(listPosition);
+            }
+            Timber.d("scrolling to pos = " + String.valueOf(listPosition));
             Timber.d(stepsJson);
+
         }
 
         @Override
@@ -140,17 +152,10 @@ public class StepsFragment extends Fragment {
 
     public void onSaveInstanceState(Bundle state) {
         super.onSaveInstanceState(state);
-        mListState = mLayoutManager.onSaveInstanceState();
-        state.putParcelable(LIST_STATE_KEY, mListState);
+        int pos = ((LinearLayoutManager)stepsRecyclerView.getLayoutManager()).findFirstCompletelyVisibleItemPosition();
+        state.putInt(Steps_STATE_KEY, pos);
     }
 
-    @Override
-    public void onViewStateRestored(Bundle savedInstanceState) {
-        super.onViewStateRestored(savedInstanceState);
-        if(savedInstanceState != null){
-            mListState = savedInstanceState.getParcelable(LIST_STATE_KEY);
-        }
-    }
 
     @Override
     public void onResume() {
@@ -159,8 +164,6 @@ public class StepsFragment extends Fragment {
             mLayoutManager.onRestoreInstanceState(mListState);
         }
     }
-
-
 
 
 }
