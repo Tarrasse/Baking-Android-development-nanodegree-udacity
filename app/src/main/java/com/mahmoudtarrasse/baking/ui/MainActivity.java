@@ -25,6 +25,7 @@ public class MainActivity extends AppCompatActivity {
         Timber.plant(new Timber.DebugTree());
 
         RecipeSyncAdapter.initializeSyncAdapter(this);
+        RecipeSyncAdapter.syncImmediately(this);
 
         getFragmentManager()
                 .beginTransaction()

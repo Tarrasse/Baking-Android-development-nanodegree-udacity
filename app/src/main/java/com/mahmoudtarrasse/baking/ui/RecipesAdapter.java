@@ -30,11 +30,14 @@ public class RecipesAdapter extends RecyclerView.Adapter<RecipesAdapter.ViewHold
     private Cursor recipes ;
     private ItemClickListener listener;
     private Context mContext ;
+    private TextView emptyView;
 
-    public RecipesAdapter(Context context, Cursor recipes, ItemClickListener listener) {
+    public RecipesAdapter(Context context, Cursor recipes, ItemClickListener listener, TextView emptyView) {
         this.mContext = context;
         this.recipes = recipes;
         this.listener = listener;
+        this.emptyView = emptyView;
+        modifyEmptyView();
     }
 
     @Override
@@ -88,6 +91,7 @@ public class RecipesAdapter extends RecyclerView.Adapter<RecipesAdapter.ViewHold
 
     public void swapCursor(Cursor recipes){
         this.recipes = recipes;
+        modifyEmptyView();
         notifyDataSetChanged();
     }
 
@@ -107,6 +111,14 @@ public class RecipesAdapter extends RecyclerView.Adapter<RecipesAdapter.ViewHold
 
     public interface ItemClickListener {
         public void OnItemClick(View v, int position, int id);
+    }
+
+    private void modifyEmptyView(){
+        if(getItemCount() <= 0){
+            emptyView.setVisibility(View.VISIBLE);
+        }else{
+            emptyView.setVisibility(View.GONE);
+        }
     }
 
 

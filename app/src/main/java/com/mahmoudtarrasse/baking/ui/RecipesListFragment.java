@@ -1,10 +1,13 @@
 package com.mahmoudtarrasse.baking.ui;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.app.Fragment;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.app.LoaderManager;
 import android.content.CursorLoader;
@@ -17,11 +20,14 @@ import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.textservice.TextInfo;
+import android.widget.TextView;
 
 import com.mahmoudtarrasse.baking.R;
 import com.mahmoudtarrasse.baking.Utility;
 import com.mahmoudtarrasse.baking.data.RecipesContract;
 import com.mahmoudtarrasse.baking.modules.Recipe;
+import com.mahmoudtarrasse.baking.sync.RecipeSyncAdapter;
 
 import java.util.ArrayList;
 
@@ -36,6 +42,8 @@ public class RecipesListFragment extends Fragment {
 
     private ArrayList<Recipe> recipes ;
     private Parcelable mListState = null;
+
+    private TextView emptyView;
 
     private int listPosition = -1;
 
@@ -58,6 +66,8 @@ public class RecipesListFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView  = inflater.inflate(R.layout.fragment_recipes_list, container, false);
         recipesRecyclerView = (RecyclerView) rootView.findViewById(R.id.recipes_list);
+        emptyView = (TextView) rootView.findViewById(R.id.recipe_list_empty_view);
+
         adapter = new RecipesAdapter(getActivity(), null, new RecipesAdapter.ItemClickListener() {
             @Override
             public void OnItemClick(View v, int position, int id) {
@@ -65,7 +75,8 @@ public class RecipesListFragment extends Fragment {
                 intent.putExtra(Utility.EXTRA_RECIPE_ID, id);
                 startActivity(intent);
             }
-        });
+        },emptyView
+        );
 
         recipesRecyclerView.setAdapter(adapter);
         if (getActivity().getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE){
@@ -128,4 +139,21 @@ public class RecipesListFragment extends Fragment {
             Timber.d("ok");
         }
     }
+
+    public class ConnectionChangeReceiver extends BroadcastReceiver
+    {
+        @Override
+        public void onReceive( Context context, Intent intent )
+        {
+            ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService( Context.CONNECTIVITY_SERVICE );
+            NetworkInfo activeNetInfo = connectivityManager.getActiveNetworkInfo();
+            NetworkInfo mobNetInfo = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE );
+            if ( activeNetInfo != null ||  mobNetInfo != null)
+            {
+                RecipeSyncAdapter.syncImmediately(getActivity());
+            }
+
+        }
+    }
+
 }
